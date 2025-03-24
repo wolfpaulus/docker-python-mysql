@@ -1,0 +1,46 @@
+services:
+  app:
+    build: . # Builds the app container using ./dockerfile
+    depends_on:
+      - db # Ensures the database starts before the app
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root # Configures the MySQL access
+      - MYSQL_PASSWORD=rootpassword
+      - MYSQL_DB=demo_db
+    networks: # Requires editing CONDIG in ./src/app.py
+      - my_network # Connects the app to a shared network
+
+  db:
+    image: mysql:8.0 # Uses the official MySQL 8 image
+    restart: always # Ensures the DB restarts on failure
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword # Root password for MySQL
+      MYSQL_DATABASE: demo_db # Creates the database on startup
+    volumes:
+      - mysql_data:/var/lib/mysql # Persists MySQL data
+    networks: # Connects the DB to the shared network
+      - my_network
+    ports:
+      - "3306:3306" # Exposes MySQL on port 3306
+
+  test:
+    build: . # Uses the same image as the app
+    depends_on:
+      - db
+      - app
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=rootpassword
+      - MYSQL_DATABASE=demo_db
+    entrypoint: ["pytest", "tests/test_app.py"] # Runs tests when started
+    networks:
+      - my_network # Connects tests to the network
+
+volumes:
+  mysql_data: # Defines a persistent volume for MySQL storage
+
+networks:
+  my_network: # Defines a shared network for communication
+    driver: bridge # Uses the default bridge driver for networking
