@@ -18,7 +18,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword # Root password for MySQL
       MYSQL_DATABASE: demo_db # Creates the database on startup
     volumes:
-      - mysql_data:/var/lib/mysql # Persists MySQL data
+      - ~/mysql_data:/var/lib/mysql # Persists MySQL data
     networks: # Connects the DB to the shared network
       - my_network
     ports:
